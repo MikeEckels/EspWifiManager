@@ -46,12 +46,17 @@ char auth[33];
 void setup() {
 	//All debug messages will print over serial unless "DEBUG" is commented out in "DebugUtils.h"
 	Serial.begin(115200);
+	Serial.println("Started");
 
-	//Must be called before using the library
-	networkManager.Begin();
+	//Begin() Must be called before using the library
+	//networkManager.Begin();
+	//Begin() can also be passed a callback that is fired when WiFi credentials are reset
+	networkManager.Begin(beginCallback);
 
 	//Attempt to connect and return pass/fail result
-	if (networkManager.Connect()) {
+	//if (networkManager.Connect()) {
+	//Connect can also be passed a callback that returns the connection attempts. Must take a single int argument.
+	if (networkManager.Connect(connectCallback)) {
 
 		//Get the auth token from the WifiManager and convert it to a char array for Blynk
 		networkManager.GetAuthentication().toCharArray(auth, 33);
@@ -80,4 +85,12 @@ void loop() {
 
 		//Run Loop code here
 	}
+}
+
+void beginCallback() {
+	Serial.println("WiFi credentials are being reset");
+}
+
+void connectCallback(int connectingStatus) {
+	Serial.print(connectingStatus);
 }

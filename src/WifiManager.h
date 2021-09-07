@@ -3,6 +3,7 @@
 
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
+#define WIFI_AUTH_OPEN ENC_TYPE_NONE
 #elif defined(ESP32)
 #include <WiFi.h>
 #else
@@ -34,7 +35,6 @@ private:
 	void CreateAP();
 	void ReadEeprom();
 	void EraseEeprom();
-	void CheckEraseButton();
 	void AppendRandomAPssidSuffix(String prefix);
 	bool CheckDuplicateSSID(String ssid);
 
@@ -50,7 +50,9 @@ public:
 	~WifiManager();
 
 	void Begin();
+	void Begin(void (*f)());
 	bool Connect();
+	bool Connect(void (*f)(int));
 	bool SpawnAP(String softap_ssid, String softap_pass);
 	void UpdateServer();
 

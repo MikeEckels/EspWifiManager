@@ -15,7 +15,38 @@ void WifiManager::Begin() {
 
     EEPROM.begin(512);
     randomSeed(analogRead(this->seedPin));
-    WifiManager::CheckEraseButton();
+
+    unsigned long previousMillis = 0;
+
+    while (!digitalRead(this->wifiResetPin)) {
+        unsigned long currentMillis = millis();
+        if (currentMillis - previousMillis >= (this->rstBtnDelaySec * 1000)) {
+            previousMillis = currentMillis;
+            WifiManager::EraseEeprom();
+        }
+    }
+
+    WifiManager::ReadEeprom();
+}
+
+void WifiManager::Begin(void (*f)()) {
+    pinMode(this->seedPin, INPUT);
+    pinMode(this->wifiResetPin, INPUT_PULLUP);
+
+    EEPROM.begin(512);
+    randomSeed(analogRead(this->seedPin));
+
+    unsigned long previousMillis = 0;
+    
+    while (!digitalRead(this->wifiResetPin)) {
+        unsigned long currentMillis = millis();
+        if (currentMillis - previousMillis >= (this->rstBtnDelaySec * 1000)) {
+            previousMillis = currentMillis;
+            (*f)();
+            WifiManager::EraseEeprom();
+        }
+    }
+
     WifiManager::ReadEeprom();
 }
 
@@ -24,6 +55,28 @@ bool WifiManager::Connect() {
 
     WiFi.begin(&ssid[0], &password[0]);
     for (int i = 0; i < 20; i++) {
+        if (WiFi.status() == WL_CONNECTED) {
+            DEBUG_PRINT_NOTICE("Succesfully Connected!");
+            this->connectionState = true;
+            return true;
+        }
+
+        delay(500);
+        DEBUG_PRINT("*");
+    }
+    DEBUG_PRINTLN();
+    DEBUG_PRINT_ERR("Connection timed out");
+    DEBUG_PRINT_NOTICE("Starting the access point");
+    this->connectionState = false;
+    return false;
+}
+
+bool WifiManager::Connect(void (*f)(int)) {
+    DEBUG_PRINTLN("Waiting for Wifi connection");
+
+    WiFi.begin(&ssid[0], &password[0]);
+    for (int i = 0; i < 20; i++) {
+        (*f)(i);
         if (WiFi.status() == WL_CONNECTED) {
             DEBUG_PRINT_NOTICE("Succesfully Connected!");
             this->connectionState = true;
@@ -137,14 +190,6 @@ void WifiManager::EraseEeprom() {
         EEPROM.write(i, 0);
     }
     EEPROM.commit();
-}
-
-void WifiManager::CheckEraseButton() {
-    delay(this->rstBtnDelaySec * 1000);
-
-    if (!digitalRead(this->wifiResetPin)) {
-        WifiManager::EraseEeprom();
-    }
 }
 
 void WifiManager::AppendRandomAPssidSuffix(String prefix) {
