@@ -43,16 +43,19 @@ private:
 
 	static void notFoundHandler(AsyncWebServerRequest* request);
 	static void WebSocketEventHandler(uint8_t num, WStype_t type, uint8_t* payload, size_t length);
-	
+
+	using beginFP = void (*)();
+	using connectFP = void (*)(int);
+
 public:
 	WifiManager();
 	WifiManager(unsigned char wifiResetPin, unsigned char seedPin);
 	~WifiManager();
 
 	void Begin();
-	void Begin(void (*f)());
+	void Begin(beginFP callback);
 	bool Connect();
-	bool Connect(void (*f)(int));
+	bool Connect(connectFP callback);
 	bool SpawnAP(String softap_ssid, String softap_pass);
 	void UpdateServer();
 

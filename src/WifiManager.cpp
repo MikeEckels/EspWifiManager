@@ -29,7 +29,7 @@ void WifiManager::Begin() {
     WifiManager::ReadEeprom();
 }
 
-void WifiManager::Begin(void (*f)()) {
+void WifiManager::Begin(beginFP callback) {
     pinMode(this->seedPin, INPUT);
     pinMode(this->wifiResetPin, INPUT_PULLUP);
 
@@ -42,7 +42,7 @@ void WifiManager::Begin(void (*f)()) {
         unsigned long currentMillis = millis();
         if (currentMillis - previousMillis >= (this->rstBtnDelaySec * 1000)) {
             previousMillis = currentMillis;
-            (*f)();
+            callback();
             WifiManager::EraseEeprom();
         }
     }
@@ -71,12 +71,12 @@ bool WifiManager::Connect() {
     return false;
 }
 
-bool WifiManager::Connect(void (*f)(int)) {
+bool WifiManager::Connect(connectFP callback) {
     DEBUG_PRINTLN("Waiting for Wifi connection");
 
     WiFi.begin(&ssid[0], &password[0]);
     for (int i = 0; i < 20; i++) {
-        (*f)(i);
+        callback(i);
         if (WiFi.status() == WL_CONNECTED) {
             DEBUG_PRINT_NOTICE("Succesfully Connected!");
             this->connectionState = true;
