@@ -52,11 +52,13 @@ void setup() {
 	//networkManager.Begin();
 	//Begin() can also be passed a callback that is fired when WiFi credentials are reset
 	networkManager.Begin(beginCallback);
+	//Non-Static callbacks can also be used: networkManager.Begin(std::bind(&class::Callback, this));
 
 	//Attempt to connect and return pass/fail result
 	//if (networkManager.Connect()) {
 	//Connect can also be passed a callback that returns the connection attempts. Must take a single int argument.
 	if (networkManager.Connect(connectCallback)) {
+		//Non-Static callbacks can also be used: networkManager.Connect(std::bind(&class::Callback, this, std::placeholders::_1))
 
 		//Get the auth token from the WifiManager and convert it to a char array for Blynk
 		networkManager.GetAuthentication().toCharArray(auth, 33);
@@ -87,6 +89,7 @@ void loop() {
 	}
 }
 
+//These are callbacks used by the begin() and connect() methods.
 void beginCallback() {
 	Serial.println("WiFi credentials are being reset");
 }

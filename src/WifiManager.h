@@ -11,6 +11,7 @@
 #endif
 
 #include "Arduino.h"
+#include <functional>
 #include <EEPROM.h>
 #include <ArduinoJson.h>
 #include <WebSocketsServer.h>
@@ -44,18 +45,15 @@ private:
 	static void notFoundHandler(AsyncWebServerRequest* request);
 	static void WebSocketEventHandler(uint8_t num, WStype_t type, uint8_t* payload, size_t length);
 
-	using beginFP = void (*)();
-	using connectFP = void (*)(int);
-
 public:
 	WifiManager();
 	WifiManager(unsigned char wifiResetPin, unsigned char seedPin);
 	~WifiManager();
 
 	void Begin();
-	void Begin(beginFP callback);
+	void Begin(std::function<void()> callback);
 	bool Connect();
-	bool Connect(connectFP callback);
+	bool Connect(std::function<void(int)> callback);
 	bool SpawnAP(String softap_ssid, String softap_pass);
 	void UpdateServer();
 

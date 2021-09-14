@@ -29,7 +29,7 @@ void WifiManager::Begin() {
     WifiManager::ReadEeprom();
 }
 
-void WifiManager::Begin(beginFP callback) {
+void WifiManager::Begin(std::function<void()> callback) {
     pinMode(this->seedPin, INPUT);
     pinMode(this->wifiResetPin, INPUT_PULLUP);
 
@@ -71,7 +71,7 @@ bool WifiManager::Connect() {
     return false;
 }
 
-bool WifiManager::Connect(connectFP callback) {
+bool WifiManager::Connect(std::function<void(int)> callback) {
     DEBUG_PRINTLN("Waiting for Wifi connection");
 
     WiFi.begin(&ssid[0], &password[0]);
