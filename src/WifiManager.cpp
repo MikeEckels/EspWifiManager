@@ -132,6 +132,13 @@ bool WifiManager::SpawnAP(String ssid, String password) {
 
 void WifiManager::UpdateServer() {
     webSocket.loop();
+    
+    if (WiFi.status() == WL_CONNECTED) {
+        this->connectionState = true;
+    }
+    else {
+        this->connectionState = false;
+    }
 }
 
 bool WifiManager::GetConnectedState() {
